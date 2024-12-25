@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تطبيق التعارف</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>تطبيق التعارف</h1>
+        <div id="main-menu">
+            <button id="register-btn">تسجيل المعلومات</button>
+            <button id="search-local-btn">البحث عن شخص من محافظتك</button>
+            <button id="search-all-btn">البحث عن صديق في جميع المحافظات</button>
+        </div>
+        <div id="form-container" class="hidden">
+            <form id="user-form">
+                <label for="name">اسمك:</label>
+                <input type="text" id="name" required>
+                <label for="username">اليوزر الخاص بك:</label>
+                <input type="text" id="username" required>
+                <label for="governorate">اختر محافظتك:</label>
+                <select id="governorate">
+                    <option value="بغداد">بغداد</option>
+                    <option value="البصرة">البصرة</option>
+                    <option value="نينوى">نينوى</option>
+                    <option value="الأنبار">الأنبار</option>
+                </select>
+                <label for="age">أدخل عمرك:</label>
+                <input type="number" id="age" required>
+                <label for="gender">اختر جنسك:</label>
+                <select id="gender">
+                    <option value="boy">ولد</option>
+                    <option value="girl">بنت</option>
+                </select>
+                <button type="submit">تسجيل</button>
+            </form>
+        </div>
+        <div id="results-container" class="hidden"></div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
