@@ -19,7 +19,6 @@
             height: 100vh;
             background: linear-gradient(135deg, #2b5876, #4e4376);
             color: #fff;
-            overflow: hidden;
         }
 
         .container {
@@ -127,7 +126,7 @@
         <div id="mainMenu" class="hidden">
             <h2>القائمة الرئيسية</h2>
             <button onclick="searchLocal()">البحث عن شخص من محافظتك</button>
-            <button onclick="searchAll()">البحث عن شخص في جميع المحافظات</button>
+            <button onclick="searchAll()">البحث عن صديق في جميع المحافظات</button>
             <button onclick="searchByName()">البحث عن شخص بالاسم</button>
             <button onclick="editInfo()">⚙️ تعديل المعلومات</button>
         </div>
@@ -178,124 +177,132 @@
     </div>
 
     <script>
-        const getUsers = () => JSON.parse(localStorage.getItem("users")) || [];
-        const saveUsers = (users) => localStorage.setItem("users", JSON.stringify(users));
-        const currentUserKey = "currentUser";
-        const saveCurrentUser = (user) => localStorage.setItem(currentUserKey, JSON.stringify(user));
-        const getCurrentUser = () => JSON.parse(localStorage.getItem(currentUserKey));
-        const isUsernameTaken = (username) => getUsers().some(user => user.username === username);
+        let usersData = JSON.parse(localStorage.getItem('usersData')) || [];
 
-        const registerUser = () => {
+        function registerUser() {
             const name = document.getElementById("name").value;
             const username = document.getElementById("username").value;
             const governorate = document.getElementById("governorate").value;
-            const age = parseInt(document.getElementById("age").value, 10);
+            const age = parseInt(document.getElementById("age").value);
             const gender = document.getElementById("gender").value;
-            if (!name || !username || !governorate || !age || !gender) {
-                alert("يرجى ملء جميع الحقول");
-                return;
-            }
-            if (isUsernameTaken(username)) {
-                alert("هذا اليوزر مستخدم بالفعل!");
-                return;
-            }
-            const newUser = { name, username, governorate, age, gender };
-            const users = getUsers();
-            users.push(newUser);
-            saveUsers(users);
-            saveCurrentUser(newUser);
-            alert("تم التسجيل بنجاح!");
-            showMainMenu();
-        };
 
-        const showMainMenu = () => {
-            document.getElementById("registerForm").classList.add("hidden");
-            document.getElementById("results").classList.add("hidden");
-            document.getElementById("editForm").classList.add("hidden");
-            document.getElementById("mainMenu").classList.remove("hidden");
-        };
+            if (name && username && governorate && age && gender) {
+                // Check if username is already taken
+                const existingUser = usersData.find(user => user.username === username);
+                if (existingUser) {
+                    alert("هذا اليوزر مستخدم بالفعل!");
+                    return;
+                }
 
-        const searchLocal = () => {
-            const user = getCurrentUser();
-            if (!user) return alert("يرجى التسجيل أولاً!");
-            const matches = getUsers().filter(other =>
-                other.governorate === user.governorate &&
-                other.gender !== user.gender &&
-                (user.gender === "boy" ? other.age <= user.age - 1 : other.age >= user.age + 1)
-            );
-            displayResults(matches);
-        };
-
-        const searchAll = () => {
-            const user = getCurrentUser();
-            if (!user) return alert("يرجى التسجيل أولاً!");
-            const matches = getUsers().filter(other => other.gender !== user.gender);
-            displayResults(matches);
-        };
-
-        const searchByName = () => {
-            const name = prompt("أدخل الاسم للبحث:");
-            if (!name) return;
-            const matches = getUsers().filter(user => user.name.includes(name));
-            displayResults(matches);
-        };
-
-        const displayResults = (matches) => {
-            const resultsDiv = document.getElementById("matches");
-            resultsDiv.innerHTML = "";
-            if (matches.length === 0) {
-                resultsDiv.innerHTML = "<p>لا توجد نتائج!</p>";
+                const user = { name, username, governorate, age, gender };
+                usersData.push(user);
+                localStorage.setItem('usersData', JSON.stringify(usersData));
+                alert("تم تسجيل المعلومات بنجاح!");
+                document.getElementById("registerForm").classList.add("hidden");
+                document.getElementById("mainMenu").classList.remove("hidden");
             } else {
-                matches.forEach(match => {
-                    const card = document.createElement("div");
-                    card.classList.add("user-card");
-                    card.innerHTML = `
+                alert("يرجى ملء جميع الحقول!");
+            }
+        }
+
+        function searchLocal() {
+            const currentUser = usersData[usersData.length - 1];
+            const matches = usersData.filter(
+                (user) =>
+                    user.governorate === currentUser.governorate &&
+                    ((currentUser.gender === 'boy' && user.gender === 'girl' && user.age <= currentUser.age) ||
+                    (currentUser.gender === 'girl' && user.gender === 'boy' && user.age >= currentUser.age))
+            );
+            displayMatches(matches);
+        }
+
+        function searchAll() {
+            const currentUser = usersData[usersData.length - 1];
+            const matches = usersData.filter(
+                (user) =>
+                    user.gender !== currentUser.gender &&
+                    ((currentUser.gender === 'boy' && user.age <= currentUser.age) ||
+                    (currentUser.gender === 'girl' && user.age >= currentUser.age))
+            );
+            displayMatches(matches);
+        }
+
+        function searchByName() {
+            const name = prompt("أدخل الاسم للبحث:");
+            if (name) {
+                const matches = usersData.filter((user) => user.name.includes(name));
+                displayMatches(matches);
+            } else {
+                alert("يرجى إدخال اسم صالح!");
+            }
+        }
+
+        function displayMatches(matches) {
+            const matchesContainer = document.getElementById("matches");
+            matchesContainer.innerHTML = "";
+
+            if (matches.length > 0) {
+                matches.forEach((match) => {
+                    const userCard = document.createElement("div");
+                    userCard.className = "user-card";
+                    userCard.innerHTML = `
                         <p>الاسم: ${match.name}</p>
                         <p>العمر: ${match.age}</p>
                         <p>المحافظة: ${match.governorate}</p>
-                        <p><a href="https://t.me/${match.username}" target="_blank">إرسال رسالة</a></p>
+                        <p>اليوزر: <a href="https://t.me/${match.username}" target="_blank">@${match.username}</a></p>
                     `;
-                    resultsDiv.appendChild(card);
+                    matchesContainer.appendChild(userCard);
                 });
+            } else {
+                matchesContainer.innerHTML = "<p>لم يتم العثور على شخص مطابق.</p>";
             }
+
             document.getElementById("mainMenu").classList.add("hidden");
             document.getElementById("results").classList.remove("hidden");
-        };
+        }
 
-        const updateUserInfo = () => {
-            const name = document.getElementById("editName").value;
-            const username = document.getElementById("editUsername").value;
-            const governorate = document.getElementById("editGovernorate").value;
-            const age = parseInt(document.getElementById("editAge").value, 10);
-            const gender = document.getElementById("editGender").value;
-            if (!name || !username || !governorate || !age || !gender) {
-                alert("يرجى ملء جميع الحقول");
-                return;
-            }
-            const users = getUsers();
-            const currentUser = getCurrentUser();
-            const index = users.findIndex(user => user.username === currentUser.username);
-            if (index !== -1) {
-                users[index] = { name, username, governorate, age, gender };
-                saveUsers(users);
-                saveCurrentUser(users[index]);
+        function editInfo() {
+            const currentUser = usersData[usersData.length - 1];
+            document.getElementById("editName").value = currentUser.name;
+            document.getElementById("editUsername").value = currentUser.username;
+            document.getElementById("editGovernorate").value = currentUser.governorate;
+            document.getElementById("editAge").value = currentUser.age;
+            document.getElementById("editGender").value = currentUser.gender;
+
+            document.getElementById("mainMenu").classList.add("hidden");
+            document.getElementById("editForm").classList.remove("hidden");
+        }
+
+        function updateUserInfo() {
+            const newName = document.getElementById("editName").value;
+            const newUsername = document.getElementById("editUsername").value;
+            const newGovernorate = document.getElementById("editGovernorate").value;
+            const newAge = parseInt(document.getElementById("editAge").value);
+            const newGender = document.getElementById("editGender").value;
+
+            if (newName && newUsername && newGovernorate && newAge && newGender) {
+                const currentUserIndex = usersData.length - 1;
+                usersData[currentUserIndex] = {
+                    name: newName,
+                    username: newUsername,
+                    governorate: newGovernorate,
+                    age: newAge,
+                    gender: newGender,
+                };
+                localStorage.setItem('usersData', JSON.stringify(usersData));
                 alert("تم تحديث المعلومات بنجاح!");
-                showMainMenu();
+                document.getElementById("editForm").classList.add("hidden");
+                document.getElementById("mainMenu").classList.remove("hidden");
             } else {
-                alert("حدث خطأ أثناء تحديث المعلومات");
+                alert("يرجى ملء جميع الحقول!");
             }
-        };
+        }
 
-        const startApp = () => {
-            const user = getCurrentUser();
-            if (user) {
-                showMainMenu();
-            } else {
-                document.getElementById("registerForm").classList.remove("hidden");
-            }
-        };
-
-        window.onload = startApp;
+        function showMainMenu() {
+            document.getElementById("results").classList.add("hidden");
+            document.getElementById("editForm").classList.add("hidden");
+            document.getElementById("mainMenu").classList.remove("hidden");
+        }
     </script>
 </body>
 </html>
