@@ -1,44 +1,301 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>تطبيق التعارف</title>
-    <link rel="stylesheet" href="styles.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: linear-gradient(135deg, #2b5876, #4e4376);
+            color: #fff;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 400px;
+            background: #333;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+        }
+
+        h1, h2 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        input, select, button {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 5px;
+        }
+
+        input, select {
+            background: #444;
+            color: #fff;
+        }
+
+        button {
+            background: #4CAF50;
+            color: #fff;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #45a049;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .user-card {
+            background: #444;
+            margin-bottom: 15px;
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        .user-card a {
+            color: #4CAF50;
+            text-decoration: none;
+        }
+
+        .footer {
+            margin-top: 20px;
+            text-align: center;
+            font-size: 14px;
+            color: #ccc;
+        }
+
+        .footer a {
+            color: #4CAF50;
+            text-decoration: none;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
-        <h1>تطبيق التعارف</h1>
-        <div id="main-menu">
-            <button id="register-btn">تسجيل المعلومات</button>
-            <button id="search-local-btn">البحث عن شخص من محافظتك</button>
-            <button id="search-all-btn">البحث عن صديق في جميع المحافظات</button>
+        <div id="registerForm">
+            <h1>تسجيل المعلومات</h1>
+            <input type="text" id="name" placeholder="الاسم" required>
+            <input type="text" id="username" placeholder="اليوزر (بدون @)" required>
+            <select id="governorate" required>
+                <option value="" disabled selected>اختر المحافظة</option>
+                <option value="بغداد">بغداد</option>
+                <option value="البصرة">البصرة</option>
+                <option value="نينوى">نينوى</option>
+                <option value="الأنبار">الأنبار</option>
+                <option value="كركوك">كركوك</option>
+                <option value="صلاح الدين">صلاح الدين</option>
+                <option value="ديالى">ديالى</option>
+                <option value="النجف">النجف</option>
+                <option value="كربلاء">كربلاء</option>
+                <option value="بابل">بابل</option>
+                <option value="واسط">واسط</option>
+                <option value="ميسان">ميسان</option>
+                <option value="ذي قار">ذي قار</option>
+                <option value="المثنى">المثنى</option>
+                <option value="القادسية">القادسية</option>
+                <option value="السليمانية">السليمانية</option>
+                <option value="أربيل">أربيل</option>
+                <option value="دهوك">دهوك</option>
+            </select>
+            <input type="number" id="age" placeholder="العمر" required>
+            <select id="gender" required>
+                <option value="" disabled selected>اختر الجنس</option>
+                <option value="boy">ولد</option>
+                <option value="girl">بنت</option>
+            </select>
+            <button onclick="registerUser()">تسجيل</button>
         </div>
-        <div id="form-container" class="hidden">
-            <form id="user-form">
-                <label for="name">اسمك:</label>
-                <input type="text" id="name" required>
-                <label for="username">اليوزر الخاص بك:</label>
-                <input type="text" id="username" required>
-                <label for="governorate">اختر محافظتك:</label>
-                <select id="governorate">
-                    <option value="بغداد">بغداد</option>
-                    <option value="البصرة">البصرة</option>
-                    <option value="نينوى">نينوى</option>
-                    <option value="الأنبار">الأنبار</option>
-                </select>
-                <label for="age">أدخل عمرك:</label>
-                <input type="number" id="age" required>
-                <label for="gender">اختر جنسك:</label>
-                <select id="gender">
-                    <option value="boy">ولد</option>
-                    <option value="girl">بنت</option>
-                </select>
-                <button type="submit">تسجيل</button>
-            </form>
+
+        <div id="mainMenu" class="hidden">
+            <h2>القائمة الرئيسية</h2>
+            <button onclick="searchLocal()">البحث عن شخص من محافظتك</button>
+            <button onclick="searchAll()">البحث عن صديق في جميع المحافظات</button>
+            <button onclick="searchByName()">البحث عن شخص بالاسم</button>
+            <button onclick="editInfo()">⚙️ تعديل المعلومات</button>
         </div>
-        <div id="results-container" class="hidden"></div>
+
+        <div id="results" class="hidden">
+            <h2>النتائج</h2>
+            <div id="matches"></div>
+            <button onclick="showMainMenu()">العودة إلى القائمة</button>
+        </div>
+
+        <div id="editForm" class="hidden">
+            <h2>تعديل المعلومات</h2>
+            <input type="text" id="editName" placeholder="الاسم الجديد" required>
+            <input type="text" id="editUsername" placeholder="اليوزر الجديد (بدون @)" required>
+            <select id="editGovernorate" required>
+                <option value="" disabled selected>اختر المحافظة الجديدة</option>
+                <option value="بغداد">بغداد</option>
+                <option value="البصرة">البصرة</option>
+                <option value="نينوى">نينوى</option>
+                <option value="الأنبار">الأنبار</option>
+                <option value="كركوك">كركوك</option>
+                <option value="صلاح الدين">صلاح الدين</option>
+                <option value="ديالى">ديالى</option>
+                <option value="النجف">النجف</option>
+                <option value="كربلاء">كربلاء</option>
+                <option value="بابل">بابل</option>
+                <option value="واسط">واسط</option>
+                <option value="ميسان">ميسان</option>
+                <option value="ذي قار">ذي قار</option>
+                <option value="المثنى">المثنى</option>
+                <option value="القادسية">القادسية</option>
+                <option value="السليمانية">السليمانية</option>
+                <option value="أربيل">أربيل</option>
+                <option value="دهوك">دهوك</option>
+            </select>
+            <input type="number" id="editAge" placeholder="العمر الجديد" required>
+            <select id="editGender" required>
+                <option value="" disabled selected>اختر الجنس الجديد</option>
+                <option value="boy">ولد</option>
+                <option value="girl">بنت</option>
+            </select>
+            <button onclick="updateUserInfo()">حفظ التغييرات</button>
+        </div>
+
+        <div class="footer">
+            © 2024 حقوق محفوظة - <a href="https://t.me/caser7" target="_blank">@caser7</a>
+        </div>
     </div>
-    <script src="script.js"></script>
+
+    <script>
+        let usersData = JSON.parse(localStorage.getItem('usersData')) || [];
+
+        function registerUser() {
+            const name = document.getElementById("name").value;
+            const username = document.getElementById("username").value;
+            const governorate = document.getElementById("governorate").value;
+            const age = parseInt(document.getElementById("age").value);
+            const gender = document.getElementById("gender").value;
+
+            if (name && username && governorate && age && gender) {
+                const user = { name, username, governorate, age, gender };
+                usersData.push(user);
+                localStorage.setItem('usersData', JSON.stringify(usersData));
+                alert("تم تسجيل المعلومات بنجاح!");
+                document.getElementById("registerForm").classList.add("hidden");
+                document.getElementById("mainMenu").classList.remove("hidden");
+            } else {
+                alert("يرجى ملء جميع الحقول!");
+            }
+        }
+
+        function searchLocal() {
+            const currentUser = usersData[usersData.length - 1];
+            const matches = usersData.filter(
+                (user) =>
+                    user.governorate === currentUser.governorate &&
+                    user.gender !== currentUser.gender &&
+                    user.age > currentUser.age
+            );
+            displayMatches(matches);
+        }
+
+        function searchAll() {
+            const currentUser = usersData[usersData.length - 1];
+            const matches = usersData.filter(
+                (user) =>
+                    user.gender !== currentUser.gender &&
+                    user.age > currentUser.age
+            );
+            displayMatches(matches);
+        }
+
+        function searchByName() {
+            const name = prompt("أدخل الاسم للبحث:");
+            if (name) {
+                const matches = usersData.filter((user) => user.name.includes(name));
+                displayMatches(matches);
+            } else {
+                alert("يرجى إدخال اسم صالح!");
+            }
+        }
+
+        function displayMatches(matches) {
+            const matchesContainer = document.getElementById("matches");
+            matchesContainer.innerHTML = "";
+
+            if (matches.length > 0) {
+                matches.forEach((match) => {
+                    const userCard = document.createElement("div");
+                    userCard.className = "user-card";
+                    const isSpecialUser = match.username === "n3ou2" && currentUser.username === "caser7";
+                    userCard.innerHTML = `
+                        <p>الاسم: ${match.name}</p>
+                        <p>العمر: ${match.age}</p>
+                        <p>المحافظة: ${match.governorate}</p>
+                        <p>اليوزر: ${isSpecialUser ? '<a href="https://t.me/n3ou2" target="_blank">@n3ou2</a>' : `<a href="https://t.me/${match.username}" target="_blank">@${match.username}</a>`}</p>
+                    `;
+                    matchesContainer.appendChild(userCard);
+                });
+            } else {
+                matchesContainer.innerHTML = "<p>لم يتم العثور على شخص مطابق.</p>";
+            }
+
+            document.getElementById("mainMenu").classList.add("hidden");
+            document.getElementById("results").classList.remove("hidden");
+        }
+
+                function editInfo() {
+            const currentUser = usersData[usersData.length - 1];
+            document.getElementById("editName").value = currentUser.name;
+            document.getElementById("editUsername").value = currentUser.username;
+            document.getElementById("editGovernorate").value = currentUser.governorate;
+            document.getElementById("editAge").value = currentUser.age;
+            document.getElementById("editGender").value = currentUser.gender;
+
+            document.getElementById("mainMenu").classList.add("hidden");
+            document.getElementById("editForm").classList.remove("hidden");
+        }
+
+        function updateUserInfo() {
+            const newName = document.getElementById("editName").value;
+            const newUsername = document.getElementById("editUsername").value;
+            const newGovernorate = document.getElementById("editGovernorate").value;
+            const newAge = parseInt(document.getElementById("editAge").value);
+            const newGender = document.getElementById("editGender").value;
+
+            if (newName && newUsername && newGovernorate && newAge && newGender) {
+                const currentUserIndex = usersData.length - 1;
+                usersData[currentUserIndex] = {
+                    name: newName,
+                    username: newUsername,
+                    governorate: newGovernorate,
+                    age: newAge,
+                    gender: newGender,
+                };
+                localStorage.setItem('usersData', JSON.stringify(usersData));
+                alert("تم تحديث المعلومات بنجاح!");
+                document.getElementById("editForm").classList.add("hidden");
+                document.getElementById("mainMenu").classList.remove("hidden");
+            } else {
+                alert("يرجى ملء جميع الحقول!");
+            }
+        }
+
+        function showMainMenu() {
+            document.getElementById("results").classList.add("hidden");
+            document.getElementById("editForm").classList.add("hidden");
+            document.getElementById("mainMenu").classList.remove("hidden");
+        }
+    </script>
 </body>
 </html>
